@@ -17,6 +17,7 @@ See also :ref:`api_stability`.
 
 `git main <https://github.com/meejah/txtorcon>`_ *will likely become v26.7.x*
 
+ * Fix SOCKS5 CONNECT to an IPv6 address: the full 16-byte address is now sent instead of its first 4 bytes
 
 
 v26.6.0

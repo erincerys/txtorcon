@@ -309,7 +309,6 @@ class _SocksMachine(object):
 
     def _send_connect_request(self):
         "sends CONNECT request"
-        # XXX needs to support v6 ... or something else does
         host = self._addr.host
         port = self._addr.port
 
@@ -317,7 +316,7 @@ class _SocksMachine(object):
             is_v6 = isinstance(self._addr, IPv6Address)
             self._data_to_send(
                 struct.pack(
-                    '!BBBB4sH',
+                    '!BBBB16sH' if is_v6 else '!BBBB4sH',
                     5,                   # version
                     0x01,                # command
                     0x00,                # reserved

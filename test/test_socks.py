@@ -1,4 +1,5 @@
 from io import BytesIO
+from socket import AF_INET6, inet_pton
 from unittest.mock import Mock, patch
 
 from twisted.trial import unittest
@@ -45,6 +46,22 @@ class SocksStateMachine(unittest.TestCase):
         self.assertTrue(
             "create_connection function required" in str(ctx.exception)
         )
+
+    def test_connect_request_bytes(self):
+        for host, expected in [
+            (u'1.2.3.4', b'\x05\x01\x00\x01\x01\x02\x03\x04\x04\xd2'),
+            (u'2002:4493:5105::a299:9bff:fe0e:4471',
+             b'\x05\x01\x00\x04\x20\x02\x44\x93\x51\x05\x00\x00'
+             b'\xa2\x99\x9b\xff\xfe\x0e\x44\x71\x04\xd2'),
+            (u'meejah.ca', b'\x05\x01\x00\x03\x09meejah.ca\x04\xd2'),
+        ]:
+            sent = []
+            sm = socks._SocksMachine(
+                'CONNECT', host, 1234,
+                on_data=sent.append, create_connection=Mock(),
+            )
+            sm._send_connect_request()
+            self.assertEqual(sent, [expected])
 
     @defer.inlineCallbacks
     def test_connect_socks_illegal_packet(self):
@@ -197,12 +214,21 @@ class SocksStateMachine(unittest.TestCase):
     @defer.inlineCallbacks
     def test_socks_ipv6(self):
 
+        expected_request = (
+            b'\x05\x01\x00\x04\x20\x02\x44\x93\x51\x05\x00\x00'
+            b'\xa2\x99\x9b\xff\xfe\x0e\x44\x71\x04\xd2'
+        )
+        self.assertEqual(
+            expected_request[4:20],
+            inet_pton(AF_INET6, '2002:4493:5105::a299:9bff:fe0e:4471'),
+        )
+
         class BadSocksServer(Protocol):
             def __init__(self):
                 self._buffer = b''
                 self._recv_stack = [
                     (b'\x05\x01\x00', b'\x05\x00'),
-                    (b'\x05\x01\x00\x04\x20\x02\x44\x93\x04\xd2',
+                    (expected_request,
                      b'\x05\x00\x00\x04' + (b'\x00' * 16) + b'\xbe\xef'),
                 ]
 
