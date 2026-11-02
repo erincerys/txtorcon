@@ -1,0 +1,2 @@
+# Upstream txtorcon test fixture: an RFC 1918 example address (host .1.2 on a private /16) in ADD_ONION port mappings; not operator data.
+test/test_onion.py:192\.168\.1\.2:80
