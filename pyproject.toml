@@ -1,0 +1,23 @@
+[project]
+name = "txtorcon"
+requires-python = ">=3.8"
+dynamic = [
+    "version",
+    "description",
+    "readme",
+    "keywords",
+    "dependencies",
+    "optional-dependencies",
+    "classifiers",
+    "authors",
+    "urls",
+    "license",
+]
+
+[dependency-groups]
+dev = [
+    "cryptography",
+    "pyOpenSSL",
+    "Twisted[tls]>=15.5.0",
+    "zope.interface>=3.6.1",
+]
